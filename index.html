@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Current Weather</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    const apiKey = '${API_KEY}';
+    let units = 'metric';
+
+    async function fetchWeather(location) {
+      try {
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?${location}&units=${units}&appid=${apiKey}`);
+        const data = await response.json();
+        if (data.cod === 200) {
+          document.getElementById('weather-result').innerHTML = `
+            <h2>Weather in ${data.name}, ${data.sys.country}</h2>
+            <p><strong>Temperature:</strong> ${data.main.temp}°${units === 'metric' ? 'C' : 'F'} (Feels like: ${data.main.feels_like}°${units === 'metric' ? 'C' : 'F'})</p>
+            <p><strong>Weather:</strong> ${data.weather[0].description}</p>
+            <p><strong>Humidity:</strong> ${data.main.humidity}%</p>
+            <p><strong>Wind Speed:</strong> ${data.wind.speed} ${units === 'metric' ? 'm/s' : 'mph'}</p>
+            <p><strong>Wind Direction:</strong> ${data.wind.deg}°</p>
+            <p><strong>Cloudiness:</strong> ${data.clouds.all}%</p>
+            <p><strong>Sunrise:</strong> ${new Date(data.sys.sunrise * 1000).toLocaleTimeString()}</p>
+            <p><strong>Sunset:</strong> ${new Date(data.sys.sunset * 1000).toLocaleTimeString()}</p>
+          `;
+        } else {
+          document.getElementById('weather-result').innerHTML = `<p>${data.message}</p>`;
+        }
+      } catch (error) {
+        document.getElementById('weather-result').innerHTML = `<p>Failed to fetch weather data</p>`;
+      }
+    }
+
+    async function getWeatherByGeolocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            fetchWeather(`lat=${lat}&lon=${lon}`);
+          },
+          error => {
+            document.getElementById('weather-result').innerHTML = `<p>Could not access location. Enter a ZIP or postal code.</p>`;
+          }
+        );
+      } else {
+        document.getElementById('weather-result').innerHTML = `<p>Geolocation not supported</p>`;
+      }
+    }
+
+    function searchByZip() {
+      const zipInput = document.getElementById('zip-input').value.trim();
+      if (zipInput) {
+        const [postalCode, countryCode] = zipInput.split(',').map(s => s.trim());
+
+        if (postalCode.match(/^\d+$/) && !countryCode) {
+          fetchWeather(`zip=${postalCode}`);
+        } else if (!countryCode) {
+          document.getElementById('weather-result').innerHTML = `
+            <p>City not found. Also note that postal codes must be queried with a country code. Example: "E1 7HS, GB"</p>
+          `;
+        } else {
+          fetchWeather(`zip=${postalCode},${countryCode}`);
+        }
+      } else {
+        document.getElementById('weather-result').innerHTML = `<p>Please enter a valid ZIP or postal code</p>`;
+      }
+    }
+
+    function changeUnits(selectedUnits) {
+      units = selectedUnits;
+      const zipInput = document.getElementById('zip-input').value.trim();
+      if (zipInput) {
+        searchByZip();
+      } else {
+        getWeatherByGeolocation();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      getWeatherByGeolocation();
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Current Weather</h1>
+    </header>
+    <main>
+      <div class="search-bar">
+        <input type="text" id="zip-input" placeholder="Enter ZIP/Postal Code (e.g., 10001 or E1 7HS, GB)">
+        <button onclick="searchByZip()">Search</button>
+      </div>
+      <div class="unit-toggle">
+        <label for="unit-select">Units:</label>
+        <select id="unit-select" onchange="changeUnits(this.value)">
+          <option value="metric" selected>Metric (°C, m/s)</option>
+          <option value="imperial">Imperial (°F, mph)</option>
+        </select>
+      </div>
+      <div id="weather-result">
+        <p>Fetching weather...</p>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
