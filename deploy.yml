@@ -15,9 +15,10 @@ jobs:
 
       - name: Replace API Key
         run: |
-          sed -i 's/\${API_KEY}/${{ secrets.OPENWEATHERMAP_API_KEY }}/g' index.html
-          echo "Replaced API Key in index.html:"
-          cat index.html | grep "const apiKey"
+          echo "Replacing API key..."
+          export API_KEY="${{ secrets.OPENWEATHERMAP_API_KEY }}"
+          envsubst < index.html > index_replaced.html
+          mv index_replaced.html index.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
