@@ -1,1 +1,2 @@
-# current-weather
+# Project Overview
+Web application that allows users to retrieve real time weather data for any location using ZIP codes and postal codes. The app integrates the OpenWeatherMap API to fetch weather details such as temperature, weather conditions, wind speed, and more. The application supports both metric and imperial units for temperature and wind measurements. Deployment replaces a placeholder API key with a secret key using GitHub Actions to protect sensitive information. This demonstrates the integration of front-end development, API consumption, and automated deployment processes to create a functional weather application.
