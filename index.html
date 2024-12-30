@@ -85,26 +85,33 @@
   </script>
 </head>
 <body>
-  <div class="container">
+  <div class="content-wrapper">
     <header>
       <h1>Current Weather</h1>
     </header>
-    <main>
-      <div class="search-bar">
-        <input type="text" id="zip-input" placeholder="Enter ZIP/Postal Code (e.g., 10001 or E1 7HS, GB)">
-        <button onclick="searchByZip()">Search</button>
-      </div>
-      <div class="unit-toggle">
-        <label for="unit-select">Units:</label>
-        <select id="unit-select" onchange="changeUnits(this.value)">
-          <option value="metric" selected>Metric (°C, m/s)</option>
-          <option value="imperial">Imperial (°F, mph)</option>
-        </select>
-      </div>
-      <div id="weather-result">
-        <p>Fetching weather...</p>
-      </div>
-    </main>
+    <div class="background-body">
+      <main>
+        <section class="search-section">
+          <div class="search-bar">
+            <input type="text" id="zip-input" placeholder="Enter ZIP/Postal Code (e.g., 10001 or E1 7HS, GB)">
+            <button onclick="searchByZip()">🔍 Search</button>
+          </div>
+          <div class="unit-toggle">
+            <label for="unit-select">Units:</label>
+            <select id="unit-select" onchange="changeUnits(this.value)">
+              <option value="metric" selected>Metric (°C, m/s)</option>
+              <option value="imperial">Imperial (°F, mph)</option>
+            </select>
+          </div>
+        </section>
+        <section id="weather-result">
+          <p>Fetching weather data...</p>
+        </section>
+      </main>
+    </div>
+    <footer>
+      <p>By Jeffrey Kuo</p>
+    </footer>
   </div>
 </body>
 </html>
