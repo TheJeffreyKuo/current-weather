@@ -10,28 +10,32 @@
     let units = 'metric';
 
     async function fetchWeather(location) {
-      try {
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?${location}&units=${units}&appid=${apiKey}`);
-        const data = await response.json();
-        if (data.cod === 200) {
-          document.getElementById('weather-result').innerHTML = `
-            <h2>Weather in ${data.name}, ${data.sys.country}</h2>
-            <p><strong>Temperature:</strong> ${data.main.temp}°${units === 'metric' ? 'C' : 'F'} (Feels like: ${data.main.feels_like}°${units === 'metric' ? 'C' : 'F'})</p>
-            <p><strong>Weather:</strong> ${data.weather[0].description}</p>
-            <p><strong>Humidity:</strong> ${data.main.humidity}%</p>
-            <p><strong>Wind Speed:</strong> ${data.wind.speed} ${units === 'metric' ? 'm/s' : 'mph'}</p>
-            <p><strong>Wind Direction:</strong> ${data.wind.deg}°</p>
-            <p><strong>Cloudiness:</strong> ${data.clouds.all}%</p>
-            <p><strong>Sunrise:</strong> ${new Date(data.sys.sunrise * 1000).toLocaleTimeString()}</p>
-            <p><strong>Sunset:</strong> ${new Date(data.sys.sunset * 1000).toLocaleTimeString()}</p>
-          `;
-        } else {
-          document.getElementById('weather-result').innerHTML = `<p>${data.message}</p>`;
-        }
-      } catch (error) {
-        document.getElementById('weather-result').innerHTML = `<p>Failed to fetch weather data</p>`;
+    try {
+      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?${location}&units=${units}&appid=${apiKey}`);
+      const data = await response.json();
+      if (data.cod === 200) {
+        const weatherIcon = `https://openweathermap.org/img/wn/${data.weather[0].icon}.png`;
+        const rainData = data.rain && data.rain['1h'] ? `${data.rain['1h']} mm/h`: (['rain', 'thunderstorm', 'drizzle'].some(condition => data.weather[0].main.toLowerCase().includes(condition)) ? 'Precipitation is occurring, but no precise data is available.' : 'No precipitation');
+        const snowData = data.snow && data.snow['1h'] ? `${data.snow['1h']} mm/h` : (data.weather[0].main.toLowerCase().includes('snow') ? 'Snow is occurring, but no precise precipitation data is available.' : 'No snow');
+
+        document.getElementById('weather-result').innerHTML = `
+          <h2><img src="${weatherIcon}" alt="${data.weather[0].main}" style="vertical-align: middle;"> Weather in ${data.name}, ${data.sys.country}</h2>
+          <p><strong>Temperature:</strong> ${data.main.temp}°${units === 'metric' ? 'C' : 'F'} (Feels like: ${data.main.feels_like}°${units === 'metric' ? 'C' : 'F'})</p>
+          <p><strong>Weather:</strong> The current condition is described as "${data.weather[0].description}".</p>
+          <p><strong>Rain:</strong> ${rainData}</p>
+          <p><strong>Snow:</strong> ${snowData}</p>
+          <p><strong>Cloudiness:</strong> ${data.clouds.all}% <span style="padding-left: 15px;"><strong>Humidity:</strong> ${data.main.humidity}%</span></p>
+          <p><strong>Wind Speed:</strong> ${data.wind.speed} ${units === 'metric' ? 'm/s' : 'mph'} <span style="padding-left: 15px;"><strong>Wind Direction:</strong> ${data.wind.deg}°</span></p>
+          <p><strong>Sunrise:</strong> ${new Date(data.sys.sunrise * 1000).toLocaleTimeString()} <span style="padding-left: 15px;"><strong>Sunset:</strong> ${new Date(data.sys.sunset * 1000).toLocaleTimeString()}</span></p>
+        `;
+      } else {
+        document.getElementById('weather-result').innerHTML = `<p>${data.message}</p>`;
       }
+    } catch (error) {
+      document.getElementById('weather-result').innerHTML = `<p>Failed to fetch weather data</p>`;
     }
+  }
+
 
     async function getWeatherByGeolocation() {
       if (navigator.geolocation) {
